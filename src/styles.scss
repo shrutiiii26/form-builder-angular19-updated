@@ -615,3 +615,38 @@ textarea.form-control {
     }
   }
 }
+
+// /* Theme variables */
+// :root {
+//   --bg: #ffffff;
+//   --fg: #1a1a1a;
+//   --muted: #6c757d;
+//   --border: #dee2e6;
+//   --primary: #4a90e2;
+//   --danger: #dc3545;
+//   --focus: #4a90e2;
+// }
+
+// [data-theme='dark'] {
+//   --bg: #0f1115;
+//   --fg: #e6e6e6;
+//   --muted: #a0a6ad;
+//   --border: #2a2f36;
+//   --primary: #6aa8ff;
+//   --danger: #ff6b6b;
+//   --focus: #6aa8ff;
+// }
+
+// html, body { background: var(--bg); color: var(--fg); }
+
+// /* Focus visibility */
+// *:focus-visible {
+//   outline: 2px solid var(--focus);
+//   outline-offset: 2px;
+// }
+
+// /* Utility respecting theme */
+// .btn { color: var(--fg); border-color: var(--border); }
+// .btn-primary { background: var(--primary); border-color: var(--primary); }
+// .btn-danger { background: var(--danger); border-color: var(--danger); }
+// .form-control { border-color: var(--border); color: var(--fg); background: var(--bg); }
