@@ -9,6 +9,11 @@ export class ThemeService {
     const newPref = currentPref === 'dark' ? 'light' : 'dark';
     this.set(newPref);
   }
+  toggleLightMode() {
+    const currentPref = this.get();
+    const newPref = currentPref === 'light' ? 'dark' : 'light';
+    this.set(newPref);
+  }
   private storageKey = 'theme-preference';
 
   init(): void {

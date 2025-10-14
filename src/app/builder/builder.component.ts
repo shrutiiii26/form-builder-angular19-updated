@@ -180,7 +180,9 @@ export class BuilderComponent implements OnInit {
 
   toggleDarkMode() {
     console.log('jkbhj');
-
     this.themeService.toggleDarkMode();
+  }
+  toggleLightMode() {
+    this.themeService.toggleLightMode();
   }
 }
