@@ -4,6 +4,7 @@ import { loadForms, resetData } from '../state/forms/forms.actions';
 import { IndexedDBService } from '../core/services/indexeddb.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ThemeService } from '../core/services/theme.service';
 
 @Component({
   selector: 'app-builder',
@@ -23,12 +24,14 @@ export class BuilderComponent implements OnInit {
   currentPageIndex = 0;
   selectedElement: any = null;
   currentFormId: string | null = null;
+  theme: any;
 
-  constructor(private store: Store, private db: IndexedDBService) { }
+  constructor(private store: Store, private db: IndexedDBService, private themeService: ThemeService) {
+    this.themeService.init();
+  }
 
   ngOnInit() {
     this.store.dispatch(loadForms());
-    // Auto-load first form if present so edits update the same record
     this.loadExisting();
   }
 
@@ -173,5 +176,11 @@ export class BuilderComponent implements OnInit {
     if (confirm('Are you sure you want to reset all data? This will clear all forms and submissions and reload seed data.')) {
       this.store.dispatch(resetData());
     }
+  }
+
+  toggleDarkMode() {
+    console.log('jkbhj');
+
+    this.themeService.toggleDarkMode();
   }
 }

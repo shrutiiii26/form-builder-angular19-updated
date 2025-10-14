@@ -46,12 +46,10 @@ export class IndexedDBService extends Dexie {
       audit: '++id, formId, action, at'
     });
 
-    // Initialize table references
     this.forms = this.table('forms');
     this.submissions = this.table('submissions');
     this.audit = this.table('audit');
 
-    // Seed initial data on first run (non-blocking)
     this.initializeSeedData();
   }
 
@@ -64,7 +62,6 @@ export class IndexedDBService extends Dexie {
         await this.seedData(seedForms);
       }
     } catch (error) {
-      // Swallow seeding errors to avoid breaking app bootstrap, but log for diagnostics
       console.error('Failed to initialize seed data:', error);
     }
   }

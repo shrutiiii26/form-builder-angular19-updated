@@ -21,7 +21,6 @@ export class AppComponent {
   }
 
   retrySync() {
-    // Placeholder: actual sync will be triggered by OutboxService when online
     if (!this.isOnline) return;
   }
 }

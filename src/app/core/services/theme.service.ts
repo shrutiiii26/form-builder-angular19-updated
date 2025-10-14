@@ -4,6 +4,11 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
+  toggleDarkMode() {
+    const currentPref = this.get();
+    const newPref = currentPref === 'dark' ? 'light' : 'dark';
+    this.set(newPref);
+  }
   private storageKey = 'theme-preference';
 
   init(): void {
@@ -27,7 +32,6 @@ export class ThemeService {
     if (pref === 'system') {
       const mql = window.matchMedia('(prefers-color-scheme: dark)');
       theme = mql.matches ? 'dark' : 'light';
-      // respond to future system changes
       mql.onchange = (e) => {
         if (this.get() === 'system') {
           root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
