@@ -1,0 +1,189 @@
+<div class="runtime-container">
+  <div class="runtime-header">
+    <h2>{{ formSchema?.name || 'Form' }}</h2>
+    <div class="header-actions">
+      <button class="btn btn-secondary" routerLink="/builder">Back to Builder</button>
+      <button class="btn btn-info" (click)="saveDraft()" [disabled]="!fg">Save Draft</button>
+    </div>
+  </div>
+
+  <div class="runtime-content" *ngIf="formSchema">
+
+    <div class="progress-indicator" *ngIf="formSchema.schema.pages.length > 1">
+      <div class="progress-steps">
+        <div *ngFor="let page of formSchema.schema.pages; let i = index" class="progress-step"
+          [class.active]="currentPageIndex === i" [class.completed]="i < currentPageIndex">
+          <div class="step-circle">{{ i + 1 }}</div>
+          <div class="step-label">{{ page.title }}</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="((currentPageIndex + 1) / formSchema.schema.pages.length) * 100">
+        </div>
+      </div>
+    </div>
+
+
+    <form [formGroup]="fg" (ngSubmit)="submit()" class="runtime-form">
+      <div class="form-page" *ngIf="formSchema.schema.pages[currentPageIndex] as currentPage">
+        <h3 class="page-title">{{ currentPage.title }}</h3>
+
+        <div class="form-fields">
+          <div *ngFor="let el of currentPage.elements" class="form-field" [class.hidden]="hiddenFields[el.id]"
+            [attr.data-field-id]="el.id">
+
+
+            <div *ngIf="el.type === 'text'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <input [id]="el.id" type="text" [formControlName]="el.id" [placeholder]="el.placeholder || ''"
+                [attr.aria-label]="el.label" [attr.aria-required]="el.required"
+                [attr.aria-describedby]="el.id + '-error'" class="form-control">
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" [id]="el.id + '-error'" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+                <span *ngIf="fg.get(el.id)?.errors?.['minlength']">Minimum length is {{ el.validators?.minLength
+                  }}</span>
+                <span *ngIf="fg.get(el.id)?.errors?.['maxlength']">Maximum length is {{ el.validators?.maxLength
+                  }}</span>
+                <span *ngIf="fg.get(el.id)?.errors?.['pattern']">Invalid format</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'textarea'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <textarea [id]="el.id" [formControlName]="el.id" [placeholder]="el.placeholder || ''"
+                [attr.aria-label]="el.label" [attr.aria-required]="el.required" rows="4"
+                class="form-control"></textarea>
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'number'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <input [id]="el.id" type="number" [formControlName]="el.id" [placeholder]="el.placeholder || ''"
+                [attr.aria-label]="el.label" [attr.aria-required]="el.required" class="form-control">
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+                <span *ngIf="fg.get(el.id)?.errors?.['min']">Minimum value is {{ el.validators?.min }}</span>
+                <span *ngIf="fg.get(el.id)?.errors?.['max']">Maximum value is {{ el.validators?.max }}</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'date'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <input [id]="el.id" type="date" [formControlName]="el.id" [attr.aria-label]="el.label"
+                [attr.aria-required]="el.required" class="form-control">
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'select'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <select [id]="el.id" [formControlName]="el.id" [attr.aria-label]="el.label"
+                [attr.aria-required]="el.required" class="form-control">
+                <option value="">-- Select --</option>
+                <option *ngFor="let opt of el.options" [value]="opt">{{ opt }}</option>
+              </select>
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'radio'" class="field-wrapper">
+              <fieldset>
+                <legend class="field-label">
+                  {{ el.label }}
+                  <span class="required" *ngIf="el.required">*</span>
+                </legend>
+                <div class="radio-group">
+                  <label *ngFor="let opt of el.options; let i = index" class="radio-label">
+                    <input type="radio" [id]="el.id + '-' + i" [formControlName]="el.id" [value]="opt"
+                      [attr.aria-label]="opt">
+                    <span>{{ opt }}</span>
+                  </label>
+                </div>
+              </fieldset>
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+
+
+            <div *ngIf="el.type === 'checkbox'" class="field-wrapper">
+              <label [for]="el.id" class="checkbox-label">
+                <input [id]="el.id" type="checkbox" [formControlName]="el.id" [attr.aria-label]="el.label">
+                <span>{{ el.label }}</span>
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+
+            <div *ngIf="el.type === 'file'" class="field-wrapper">
+              <label [for]="el.id" class="field-label">
+                {{ el.label }}
+                <span class="required" *ngIf="el.required">*</span>
+              </label>
+              <input [id]="el.id" type="file" (change)="onFileChange($event, el.id)" [attr.aria-label]="el.label"
+                class="form-control">
+              <div *ngIf="fg.get(el.id)?.invalid && (fg.get(el.id)?.dirty || fg.get(el.id)?.touched)"
+                class="error-message" role="alert">
+                <span *ngIf="fg.get(el.id)?.errors?.['required']">This field is required</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="form-navigation">
+          <button type="button" class="btn btn-secondary" (click)="previousPage()" [disabled]="currentPageIndex === 0">
+            Previous
+          </button>
+
+          <button type="button" *ngIf="currentPageIndex < formSchema.schema.pages.length - 1" class="btn btn-primary"
+            (click)="nextPage()">
+            Next
+          </button>
+
+          <button type="submit" *ngIf="currentPageIndex === formSchema.schema.pages.length - 1" class="btn btn-success"
+            [disabled]="fg.invalid">
+            Submit Form
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="no-form" *ngIf="!formSchema">
+    <p>Loading form...</p>
+  </div>
+</div>

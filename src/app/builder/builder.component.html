@@ -1,0 +1,273 @@
+<div class="builder-container">
+  <!-- Header -->
+  <div class="builder-header">
+    <h2>Form Builder</h2>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadExisting()">Load Existing</button>
+      <button class="btn btn-primary" (click)="save()">Save Form</button>
+      <button class="btn btn-danger" (click)="resetDemo()">Reset Demo Data</button>
+    </div>
+  </div>
+
+  <div class="builder-layout">
+    <!-- Left Sidebar: Field Palette -->
+    <div class="palette-sidebar">
+      <h3>Field Types</h3>
+      <div class="field-palette">
+        <div class="palette-item" (click)="addField('text')" tabindex="0" role="button" aria-label="Add text field">
+          <span class="palette-icon"><i class="fa-solid fa-pen"></i></span>
+          <span>Text</span>
+        </div>
+        <div class="palette-item" (click)="addField('textarea')" tabindex="0" role="button"
+          aria-label="Add textarea field">
+          <span class="palette-icon"><i class="fa-solid fa-hashtag"></i></span>
+          <span>Textarea</span>
+        </div>
+        <div class="palette-item" (click)="addField('number')" tabindex="0" role="button" aria-label="Add number field">
+          <span class="palette-icon"><i class="fa-solid fa-book"></i></span>
+          <span>Number</span>
+        </div>
+        <div class="palette-item" (click)="addField('date')" tabindex="0" role="button" aria-label="Add date field">
+          <span class="palette-icon"><i class="fa-solid fa-calendar"></i></span>
+          <span>Date</span>
+        </div>
+        <div class="palette-item" (click)="addField('select')" tabindex="0" role="button" aria-label="Add select field">
+          <span class="palette-icon"><i class="fa-solid fa-list"></i></span>
+          <span>Select</span>
+        </div>
+        <div class="palette-item" (click)="addField('radio')" tabindex="0" role="button" aria-label="Add radio field">
+          <span class="palette-icon"><i class="fa-solid fa-circle"></i></span>
+          <span>Radio</span>
+        </div>
+        <div class="palette-item" (click)="addField('checkbox')" tabindex="0" role="button"
+          aria-label="Add checkbox field">
+          <span class="palette-icon"><i class="fa-solid fa-check"></i></span>
+          <span>Checkbox</span>
+        </div>
+        <div class="palette-item" (click)="addField('file')" tabindex="0" role="button" aria-label="Add file field">
+          <span class="palette-icon"><i class="fa-solid fa-file"></i></span>
+          <span>File</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Canvas -->
+    <div class="canvas-area">
+      <div class="form-settings">
+        <label>
+          Form Title:
+          <input type="text" [(ngModel)]="schema.title" placeholder="Enter form title" class="form-control"
+            aria-label="Form title">
+        </label>
+      </div>
+
+      <!-- Pages Tabs -->
+      <div class="pages-tabs">
+        <button *ngFor="let page of schema.pages; let i = index" [class.active]="currentPageIndex === i"
+          (click)="currentPageIndex = i" class="page-tab" [attr.aria-selected]="currentPageIndex === i">
+          {{ page.title }}
+        </button>
+        <button class="page-tab add-page" (click)="addPage()" aria-label="Add new page">
+          + Add Page
+        </button>
+      </div>
+
+      <!-- Current Page Canvas -->
+      <div class="canvas-content">
+        <h3>{{ schema.pages[currentPageIndex]?.title || 'Page' }}</h3>
+
+        <div class="page-title-edit">
+          <label>
+            Page Title:
+            <input type="text" [(ngModel)]="schema.pages[currentPageIndex].title" class="form-control"
+              placeholder="Enter page title">
+          </label>
+        </div>
+
+        <div class="form-elements">
+          <div *ngFor="let el of schema.pages[currentPageIndex]?.elements; let i = index" class="form-element"
+            [class.selected]="selectedElement === el" (click)="selectElement(el)" tabindex="0" role="button"
+            [attr.aria-label]="'Field: ' + el.label">
+
+            <div class="element-header">
+              <span class="element-type-badge">{{ el.type }}</span>
+              <span class="element-label">{{ el.label }}</span>
+              <div class="element-actions">
+                <button class="btn-icon" (click)="moveUp(i); $event.stopPropagation()" [disabled]="i === 0"
+                  aria-label="Move up">
+                  up
+                </button>
+                <button class="btn-icon" (click)="moveDown(i); $event.stopPropagation()"
+                  [disabled]="i === schema.pages[currentPageIndex].elements.length - 1" aria-label="Move down">
+                  down
+                </button>
+                <button class="btn-icon btn-danger" (click)="remove(i); $event.stopPropagation()"
+                  aria-label="Delete field">
+                  delete
+                </button>
+              </div>
+            </div>
+
+            <div class="element-preview">
+              <label>{{ el.label }}<span *ngIf="el.required" class="required">*</span></label>
+
+              <input *ngIf="el.type === 'text' || el.type === 'number' || el.type === 'date'" [type]="el.type"
+                [placeholder]="el.placeholder || ''" class="form-control">
+
+              <textarea *ngIf="el.type === 'textarea'" [placeholder]="el.placeholder || ''"
+                class="form-control"></textarea>
+
+              <select *ngIf="el.type === 'select'" class="form-control">
+                <option *ngFor="let opt of el.options">{{ opt }}</option>
+              </select>
+
+              <div *ngIf="el.type === 'radio'" class="radio-group">
+                <label *ngFor="let opt of el.options" class="radio-label">
+                  <input type="radio" [name]="el.id">
+                  <span>{{ opt }}</span>
+                </label>
+              </div>
+
+              <label *ngIf="el.type === 'checkbox'" class="checkbox-label">
+                <input type="checkbox">
+                <span>{{ el.label }}</span>
+              </label>
+
+              <input *ngIf="el.type === 'file'" type="file" class="form-control">
+            </div>
+          </div>
+
+          <div *ngIf="!schema.pages[currentPageIndex]?.elements?.length" class="empty-canvas">
+            <p>Drag fields from the palette or click to add fields to this page</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="properties-sidebar">
+      <h3>Properties</h3>
+
+      <div *ngIf="!selectedElement" class="no-selection">
+        <p>Select a field to edit its properties</p>
+      </div>
+
+      <div *ngIf="selectedElement" class="properties-form">
+        <div class="form-group">
+          <label>Field ID</label>
+          <input type="text" [(ngModel)]="selectedElement.id" class="form-control" readonly>
+        </div>
+
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" [(ngModel)]="selectedElement.label" class="form-control" placeholder="Enter field label">
+        </div>
+
+        <div class="form-group">
+          <label>Placeholder</label>
+          <input type="text" [(ngModel)]="selectedElement.placeholder" class="form-control"
+            placeholder="Enter placeholder text">
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="selectedElement.required">
+            <span>Required</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="selectedElement.disabled">
+            <span>Disabled</span>
+          </label>
+        </div>
+
+        <div *ngIf="selectedElement.type === 'select' || selectedElement.type === 'radio'" class="form-group">
+          <label>Options (comma-separated)</label>
+          <textarea [(ngModel)]="selectedElement.optionsText" (ngModelChange)="updateOptions(selectedElement)"
+            class="form-control" rows="3" placeholder="Option 1, Option 2, Option 3"></textarea>
+        </div>
+
+        <div *ngIf="selectedElement.type === 'text'" class="form-group">
+          <label>Min Length</label>
+          <input type="number" [(ngModel)]="selectedElement.validators.minLength" class="form-control">
+        </div>
+
+        <div *ngIf="selectedElement.type === 'text'" class="form-group">
+          <label>Max Length</label>
+          <input type="number" [(ngModel)]="selectedElement.validators.maxLength" class="form-control">
+        </div>
+
+        <div *ngIf="selectedElement.type === 'number'" class="form-group">
+          <label>Min Value</label>
+          <input type="number" [(ngModel)]="selectedElement.validators.min" class="form-control">
+        </div>
+
+        <div *ngIf="selectedElement.type === 'number'" class="form-group">
+          <label>Max Value</label>
+          <input type="number" [(ngModel)]="selectedElement.validators.max" class="form-control">
+        </div>
+
+        <div *ngIf="selectedElement.type === 'text'" class="form-group">
+          <label>Pattern (regex)</label>
+          <input type="text" [(ngModel)]="selectedElement.validators.pattern" class="form-control"
+            placeholder="^[a-zA-Z]+$">
+        </div>
+      </div>
+
+      <!-- Rules Editor -->
+      <div class="rules-section">
+        <h3>Conditional Rules</h3>
+        <div class="rules-list">
+          <div *ngFor="let rule of schema.rules; let i = index" class="rule-item">
+            <div class="rule-header">
+              <span>Rule {{ i + 1 }}</span>
+              <button class="btn-icon btn-danger" (click)="removeRule(i)"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="form-group">
+              <label>Condition</label>
+              <input type="text" [(ngModel)]="rule.if" class="form-control" placeholder="e.g., f3 === 'Other'">
+            </div>
+            <div class="form-group">
+              <label>Action</label>
+              <select [(ngModel)]="rule.then[0].action" class="form-control">
+                <option value="show">Show</option>
+                <option value="hide">Hide</option>
+                <option value="enable">Enable</option>
+                <option value="disable">Disable</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Target Field ID</label>
+              <input type="text" [(ngModel)]="rule.then[0].target" class="form-control" placeholder="Field ID">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" (click)="addRule()">+ Add Rule</button>
+      </div>
+
+      <!-- Computed Fields Editor -->
+      <div class="computed-section">
+        <h3>Computed Fields</h3>
+        <div class="computed-list">
+          <div *ngFor="let comp of schema.computed; let i = index" class="computed-item">
+            <div class="computed-header">
+              <span>Computed {{ i + 1 }}</span>
+              <button class="btn-icon btn-danger" (click)="removeComputed(i)"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="form-group">
+              <label>Target Field ID</label>
+              <input type="text" [(ngModel)]="comp.target" class="form-control" placeholder="Field ID">
+            </div>
+            <div class="form-group">
+              <label>Expression</label>
+              <textarea [(ngModel)]="comp.expr" class="form-control" rows="2" placeholder="e.g., f6 * 12"></textarea>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" (click)="addComputed()">+ Add Computed Field</button>
+      </div>
+    </div>
+  </div>
+</div>
