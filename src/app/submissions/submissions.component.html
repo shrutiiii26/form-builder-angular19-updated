@@ -1,0 +1,38 @@
+<div class="submissions-container">
+  <div class="submissions-header">
+    <h2>Form Submissions</h2>
+    <div class="header-actions">
+      <input type="text" 
+             [(ngModel)]="searchTerm" 
+             (input)="onSearchChange()"
+             placeholder="Search submissions..." 
+             class="form-control search-input">
+      <input type="date" 
+             [(ngModel)]="dateFilter" 
+             (change)="onDateChange()"
+             class="form-control date-input">
+      <button class="btn btn-primary" (click)="exportToCSV()" [disabled]="filteredSubmissions.length === 0">
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="submissions-stats">
+    <span>Showing {{ filteredSubmissions.length }} of {{ submissions.length }} submissions</span>
+  </div>
+
+  <div class="submissions-list">
+    <cdk-virtual-scroll-viewport itemSize="100" class="viewport">
+      <div *cdkVirtualFor="let submission of filteredSubmissions; trackBy: trackBySubmission" 
+           class="submission-item">
+        <div class="submission-header">
+          <span class="submission-id">{{ submission.id }}</span>
+          <span class="submission-date">{{ submission.createdAt | date:'medium' }}</span>
+        </div>
+        <div class="submission-data">
+          <pre>{{ submission.data | json }}</pre>
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  </div>
+</div>

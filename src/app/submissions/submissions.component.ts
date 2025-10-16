@@ -1,50 +1,86 @@
-import { Component, OnInit } from '@angular/core';
-import { IndexedDBService } from '../core/services/indexeddb.service';
-import { ScrollingModule } from "@angular/cdk/scrolling";
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { IndexedDBService, Submission } from '../core/services/indexeddb.service';
+import { CommonModule } from '@angular/common';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-submissions',
-  template: `
-    <div>
-      <h2>Submissions</h2>
-      <button (click)="generateMock()">Generate 1000 mock</button>
-      <button (click)="exportCsv()">Export CSV</button>
-      <cdk-virtual-scroll-viewport itemSize="50" style="height:400px; border:1px solid #ddd;">
-        <div *cdkVirtualFor="let s of submissions">
-          <div style="padding:8px; border-bottom:1px solid #eee;">
-            <strong>{{s.id}}</strong> - {{s.formId}} - {{s.createdAt}}
-            <pre>{{s.data | json}}</pre>
-          </div>
-        </div>
-      </cdk-virtual-scroll-viewport>
-    </div>
-  `,
-  imports: [ScrollingModule]
+  templateUrl: './submissions.component.html',
+  styleUrls: ['./submissions.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, ScrollingModule, FormsModule]
 })
 export class SubmissionsComponent implements OnInit {
-  submissions: any[] = [];
+  submissions: Submission[] = [];
+  filteredSubmissions: Submission[] = [];
+  formId: string | null = null;
+  searchTerm = '';
+  dateFilter = '';
 
-  constructor(private db: IndexedDBService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private db: IndexedDBService
+  ) {}
 
   async ngOnInit() {
-    this.submissions = await this.db.submissions.toArray();
+    this.formId = this.route.snapshot.paramMap.get('id');
+    await this.loadSubmissions();
   }
 
-  async generateMock() {
-    for (let i = 0; i < 1000; i++) {
-      await this.db.saveSubmission({ id: 'mock-' + Date.now() + '-' + i, formId: 'form-1', formVersion: '1.0.0', data: { v: i }, createdAt: new Date().toISOString() });
+  async loadSubmissions() {
+    if (this.formId) {
+      this.submissions = await this.db.getSubmissions(this.formId);
+    } else {
+      this.submissions = await this.db.getAllSubmissions();
     }
-    this.submissions = await this.db.submissions.toArray();
+    this.applyFilters();
   }
 
-  exportCsv() {
-    const headers = ['id', 'formId', 'formVersion', 'createdAt', 'data'];
-    const rows = this.submissions.map(s => [s.id, s.formId, s.formVersion, s.createdAt, JSON.stringify(s.data)]);
-    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+  applyFilters() {
+    this.filteredSubmissions = this.submissions.filter(sub => {
+      const matchesSearch = !this.searchTerm || 
+        JSON.stringify(sub.data).toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesDate = !this.dateFilter || 
+        new Date(sub.createdAt).toDateString() === new Date(this.dateFilter).toDateString();
+      return matchesSearch && matchesDate;
+    });
+  }
+
+  onSearchChange() {
+    this.applyFilters();
+  }
+
+  onDateChange() {
+    this.applyFilters();
+  }
+
+  exportToCSV() {
+    if (this.filteredSubmissions.length === 0) return;
+
+    const headers = ['ID', 'Form ID', 'Created At', 'Data'];
+    const csvContent = [
+      headers.join(','),
+      ...this.filteredSubmissions.map(sub => [
+        sub.id,
+        sub.formId,
+        sub.createdAt,
+        `"${JSON.stringify(sub.data).replace(/"/g, '""')}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'submissions.csv'; a.click();
+    a.href = url;
+    a.download = `submissions-${this.formId || 'all'}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
+  }
+
+  trackBySubmission(index: number, submission: Submission): string {
+    return submission.id;
   }
 }

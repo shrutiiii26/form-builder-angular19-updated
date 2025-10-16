@@ -160,4 +160,72 @@ export class WorkerService {
       this.worker.terminate();
     }
   }
+
+  private syntheticInterval?: number;
+  private isGenerating = false;
+
+  startSyntheticGeneration(intervalMs: number = 5000): void {
+    if (this.isGenerating) return;
+
+    this.isGenerating = true;
+    this.syntheticInterval = window.setInterval(() => {
+      this.generateSyntheticSubmission();
+    }, intervalMs);
+  }
+
+  stopSyntheticGeneration(): void {
+    if (this.syntheticInterval) {
+      clearInterval(this.syntheticInterval);
+      this.syntheticInterval = undefined;
+    }
+    this.isGenerating = false;
+  }
+
+  private generateSyntheticSubmission(): void {
+    const syntheticData = {
+      name: this.randomName(),
+      email: this.randomEmail(),
+      age: Math.floor(Math.random() * 50) + 18,
+      department: this.randomDepartment(),
+      salary: Math.floor(Math.random() * 100000) + 30000,
+      startDate: this.randomDate(),
+      skills: this.randomSkills(),
+      rating: Math.floor(Math.random() * 5) + 1
+    };
+
+    this.messageSubject.next({
+      type: 'SYNTHETIC_SUBMISSION',
+      result: syntheticData
+    });
+  }
+
+  private randomName(): string {
+    const names = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Brown', 'Charlie Wilson'];
+    return names[Math.floor(Math.random() * names.length)];
+  }
+
+  private randomEmail(): string {
+    const domains = ['example.com', 'test.org', 'demo.net'];
+    const name = this.randomName().toLowerCase().replace(' ', '.');
+    const domain = domains[Math.floor(Math.random() * domains.length)];
+    return `${name}@${domain}`;
+  }
+
+  private randomDepartment(): string {
+    const depts = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+    return depts[Math.floor(Math.random() * depts.length)];
+  }
+
+  private randomDate(): string {
+    const start = new Date(2020, 0, 1);
+    const end = new Date();
+    const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    return date.toISOString().split('T')[0];
+  }
+
+  private randomSkills(): string[] {
+    const skills = ['JavaScript', 'TypeScript', 'Angular', 'React', 'Node.js', 'Python', 'Java', 'C#'];
+    const count = Math.floor(Math.random() * 3) + 1;
+    return skills.sort(() => 0.5 - Math.random()).slice(0, count);
+  }
 }

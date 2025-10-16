@@ -1,0 +1,107 @@
+.submissions-container {
+  padding: 16px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.submissions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-input {
+  width: 200px;
+}
+
+.date-input {
+  width: 150px;
+}
+
+.submissions-stats {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.submissions-list {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewport {
+  height: 100%;
+  width: 100%;
+}
+
+.submission-item {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.submission-item:last-child {
+  border-bottom: none;
+}
+
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.submission-id {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.submission-date {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.submission-data {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.submission-data pre {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .submissions-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+  }
+  
+  .search-input,
+  .date-input {
+    width: 100%;
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Form Builder Offline",
+  "short_name": "FormBuilder",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "Offline-first Angular Form Builder",
+  "icons": []
+}

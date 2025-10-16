@@ -4,6 +4,7 @@ import { loadForms, resetData } from '../state/forms/forms.actions';
 import { IndexedDBService } from '../core/services/indexeddb.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ThemeService } from '../core/services/theme.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { ThemeService } from '../core/services/theme.service';
   templateUrl: './builder.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DragDropModule]
 })
 export class BuilderComponent implements OnInit {
   schema: any = {
@@ -24,6 +25,20 @@ export class BuilderComponent implements OnInit {
   currentPageIndex = 0;
   selectedElement: any = null;
   currentFormId: string | null = null;
+  formVersions: any[] = [];
+  showVersionHistory = false;
+  
+  // Field types for palette
+  fieldTypes = [
+    { type: 'text', label: 'Text', icon: '📝' },
+    { type: 'textarea', label: 'Textarea', icon: '📄' },
+    { type: 'number', label: 'Number', icon: '🔢' },
+    { type: 'date', label: 'Date', icon: '📅' },
+    { type: 'select', label: 'Select', icon: '📋' },
+    { type: 'radio', label: 'Radio', icon: '🔘' },
+    { type: 'checkbox', label: 'Checkbox', icon: '☑️' },
+    { type: 'file', label: 'File', icon: '📎' }
+  ];
   theme: any;
 
   constructor(private store: Store, private db: IndexedDBService, private themeService: ThemeService) {
@@ -137,6 +152,13 @@ export class BuilderComponent implements OnInit {
       this.currentFormId = form.id;
       this.currentPageIndex = 0;
       this.selectedElement = null;
+      await this.loadFormVersions();
+    }
+  }
+
+  async loadFormVersions() {
+    if (this.currentFormId) {
+      this.formVersions = await this.db.getFormVersions(this.currentFormId);
     }
   }
 
@@ -178,11 +200,89 @@ export class BuilderComponent implements OnInit {
     }
   }
 
-  toggleDarkMode() {
-    console.log('jkbhj');
-    this.themeService.toggleDarkMode();
+  // Drag and drop handlers
+  dropField(event: CdkDragDrop<any[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
   }
-  toggleLightMode() {
-    this.themeService.toggleLightMode();
+
+  dropFromPalette(event: CdkDragDrop<any[]>) {
+    const fieldType = event.item.data;
+    const newField = this.createField(fieldType.type);
+    event.container.data.splice(event.currentIndex, 0, newField);
+  }
+
+  private createField(type: string): any {
+    const id = 'f' + Date.now();
+    const el: any = {
+      id,
+      type,
+      label: type.charAt(0).toUpperCase() + type.slice(1) + ' Field',
+      placeholder: '',
+      required: false,
+      disabled: false,
+      validators: {}
+    };
+
+    if (type === 'select' || type === 'radio') {
+      el.options = ['Option 1', 'Option 2', 'Option 3'];
+      el.optionsText = el.options.join(', ');
+    }
+
+    return el;
+  }
+
+  // Keyboard navigation for accessibility
+  onKeyDown(event: KeyboardEvent, index: number) {
+    if (event.key === 'ArrowUp' && index > 0) {
+      event.preventDefault();
+      this.moveUp(index);
+    } else if (event.key === 'ArrowDown' && index < this.schema.pages[this.currentPageIndex].elements.length - 1) {
+      event.preventDefault();
+      this.moveDown(index);
+    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      this.remove(index);
+    }
+  }
+
+  async bumpVersion() {
+    if (!this.currentFormId) return;
+    try {
+      const newVersion = await this.db.bumpVersion(this.currentFormId);
+      await this.loadFormVersions();
+      alert(`Version bumped to ${newVersion}`);
+    } catch (e) {
+      alert('Failed to bump version');
+    }
+  }
+
+  async revertToVersion(version: string) {
+    if (!this.currentFormId) return;
+    if (!confirm(`Are you sure you want to revert to version ${version}?`)) return;
+    
+    try {
+      await this.db.revertToVersion(this.currentFormId, version);
+      await this.loadExisting();
+      alert(`Reverted to version ${version}`);
+    } catch (e) {
+      alert('Failed to revert version');
+    }
+  }
+
+  toggleVersionHistory() {
+    this.showVersionHistory = !this.showVersionHistory;
+  }
+
+  toggleDarkMode() {
+    this.themeService.toggleDarkMode();
   }
 }

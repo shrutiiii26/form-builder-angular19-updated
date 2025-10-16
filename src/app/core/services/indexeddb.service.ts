@@ -176,4 +176,44 @@ export class IndexedDBService extends Dexie {
       .and(log => log.action === 'update' || log.action === 'create')
       .toArray();
   }
+
+  async bumpVersion(formId: string): Promise<string> {
+    const form = await this.getFormById(formId);
+    if (!form) throw new Error('Form not found');
+
+    const versionParts = form.version.split('.').map(Number);
+    versionParts[1]++; // bump minor version
+    const newVersion = versionParts.join('.');
+
+    const updatedForm = { ...form, version: newVersion, updatedAt: new Date().toISOString() };
+    await this.saveForm(updatedForm);
+    return newVersion;
+  }
+
+  async revertToVersion(formId: string, targetVersion: string): Promise<void> {
+    const versions = await this.getFormVersions(formId);
+    const targetVersionLog = versions.find(v => v.payload?.version === targetVersion);
+
+    if (!targetVersionLog) throw new Error('Version not found');
+
+    const form = await this.getFormById(formId);
+    if (!form) throw new Error('Form not found');
+
+    const restoredForm = {
+      ...form,
+      schema: targetVersionLog.payload.schema,
+      version: targetVersion,
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.saveForm(restoredForm);
+
+    // Log the revert action
+    await this.audit.add({
+      formId,
+      action: 'revert',
+      payload: { from: form.version, to: targetVersion },
+      at: new Date().toISOString()
+    });
+  }
 }

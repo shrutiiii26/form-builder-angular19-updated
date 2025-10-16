@@ -6,6 +6,8 @@
       <button class="btn btn-secondary" (click)="toggleDarkMode()">Toggle Theme</button>
       <button class="btn btn-secondary" (click)="loadExisting()">Load Existing</button>
       <button class="btn btn-primary" (click)="save()">Save Form</button>
+      <button class="btn btn-info" (click)="bumpVersion()" [disabled]="!currentFormId">Bump Version</button>
+      <button class="btn btn-secondary" (click)="toggleVersionHistory()">Version History</button>
       <button class="btn btn-danger" (click)="resetDemo()">Reset Demo Data</button>
     </div>
   </div>
@@ -14,40 +16,16 @@
     <!-- Left Sidebar: Field Palette -->
     <div class="palette-sidebar">
       <h3>Field Types</h3>
-      <div class="field-palette">
-        <div class="palette-item" (click)="addField('text')" tabindex="0" role="button" aria-label="Add text field">
-          <span class="palette-icon"><i class="fa-solid fa-pen"></i></span>
-          <span>Text</span>
-        </div>
-        <div class="palette-item" (click)="addField('textarea')" tabindex="0" role="button"
-          aria-label="Add textarea field">
-          <span class="palette-icon"><i class="fa-solid fa-hashtag"></i></span>
-          <span>Textarea</span>
-        </div>
-        <div class="palette-item" (click)="addField('number')" tabindex="0" role="button" aria-label="Add number field">
-          <span class="palette-icon"><i class="fa-solid fa-book"></i></span>
-          <span>Number</span>
-        </div>
-        <div class="palette-item" (click)="addField('date')" tabindex="0" role="button" aria-label="Add date field">
-          <span class="palette-icon"><i class="fa-solid fa-calendar"></i></span>
-          <span>Date</span>
-        </div>
-        <div class="palette-item" (click)="addField('select')" tabindex="0" role="button" aria-label="Add select field">
-          <span class="palette-icon"><i class="fa-solid fa-list"></i></span>
-          <span>Select</span>
-        </div>
-        <div class="palette-item" (click)="addField('radio')" tabindex="0" role="button" aria-label="Add radio field">
-          <span class="palette-icon"><i class="fa-solid fa-circle"></i></span>
-          <span>Radio</span>
-        </div>
-        <div class="palette-item" (click)="addField('checkbox')" tabindex="0" role="button"
-          aria-label="Add checkbox field">
-          <span class="palette-icon"><i class="fa-solid fa-check"></i></span>
-          <span>Checkbox</span>
-        </div>
-        <div class="palette-item" (click)="addField('file')" tabindex="0" role="button" aria-label="Add file field">
-          <span class="palette-icon"><i class="fa-solid fa-file"></i></span>
-          <span>File</span>
+      <div class="field-palette" cdkDropList [cdkDropListData]="fieldTypes" cdkDropListSortingDisabled="true">
+        <div *ngFor="let fieldType of fieldTypes" 
+             class="palette-item" 
+             cdkDrag 
+             [cdkDragData]="fieldType"
+             tabindex="0" 
+             role="button" 
+             [attr.aria-label]="'Add ' + fieldType.label + ' field'">
+          <span class="palette-icon">{{ fieldType.icon }}</span>
+          <span>{{ fieldType.label }}</span>
         </div>
       </div>
     </div>
@@ -85,10 +63,20 @@
           </label>
         </div>
 
-        <div class="form-elements">
-          <div *ngFor="let el of schema.pages[currentPageIndex]?.elements; let i = index" class="form-element"
-            [class.selected]="selectedElement === el" (click)="selectElement(el)" tabindex="0" role="button"
-            [attr.aria-label]="'Field: ' + el.label">
+        <div class="form-elements" 
+             cdkDropList 
+             [cdkDropListData]="schema.pages[currentPageIndex]?.elements || []"
+             (cdkDropListDropped)="dropField($event)"
+             cdkDropListOrientation="vertical">
+          <div *ngFor="let el of schema.pages[currentPageIndex]?.elements; let i = index" 
+               class="form-element"
+               [class.selected]="selectedElement === el" 
+               (click)="selectElement(el)" 
+               (keydown)="onKeyDown($event, i)"
+               cdkDrag
+               tabindex="0" 
+               role="button"
+               [attr.aria-label]="'Field: ' + el.label + ', position ' + (i + 1) + ' of ' + schema.pages[currentPageIndex].elements.length">
 
             <div class="element-header">
               <span class="element-type-badge">{{ el.type }}</span>
@@ -96,15 +84,15 @@
               <div class="element-actions">
                 <button class="btn-icon" (click)="moveUp(i); $event.stopPropagation()" [disabled]="i === 0"
                   aria-label="Move up">
-                  up
+                  ↑
                 </button>
                 <button class="btn-icon" (click)="moveDown(i); $event.stopPropagation()"
                   [disabled]="i === schema.pages[currentPageIndex].elements.length - 1" aria-label="Move down">
-                  down
+                  ↓
                 </button>
                 <button class="btn-icon btn-danger" (click)="remove(i); $event.stopPropagation()"
                   aria-label="Delete field">
-                  delete
+                  ×
                 </button>
               </div>
             </div>
@@ -269,6 +257,25 @@
         </div>
         <button class="btn btn-secondary" (click)="addComputed()">+ Add Computed Field</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Version History Modal -->
+  <div *ngIf="showVersionHistory" class="version-history-modal" (click)="showVersionHistory = false">
+    <div class="version-history-content" (click)="$event.stopPropagation()">
+      <h3>Version History</h3>
+      <div class="version-list">
+        <div *ngFor="let version of formVersions" class="version-item">
+          <div class="version-info">
+            <span class="version-number">{{ version.payload?.version || 'Unknown' }}</span>
+            <span class="version-date">{{ version.at | date:'medium' }}</span>
+          </div>
+          <button class="btn btn-sm btn-secondary" (click)="revertToVersion(version.payload?.version)">
+            Revert
+          </button>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="showVersionHistory = false">Close</button>
     </div>
   </div>
 </div>

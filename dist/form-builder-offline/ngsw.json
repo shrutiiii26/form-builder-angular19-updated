@@ -1,0 +1,90 @@
+{
+  "configVersion": 1,
+  "timestamp": 1760461042804,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/155.js",
+        "/291.js",
+        "/341.js",
+        "/818.js",
+        "/976.js",
+        "/index.html",
+        "/main.js",
+        "/manifest.webmanifest",
+        "/polyfills.js",
+        "/runtime.js",
+        "/styles.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/assets/seed-forms.json"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "seed-json",
+      "patterns": [
+        "\\/assets\\/seed-forms\\.json"
+      ],
+      "strategy": "freshness",
+      "maxSize": 5,
+      "maxAge": 604800000,
+      "timeoutMs": 5000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    }
+  ],
+  "hashTable": {
+    "/155.js": "19a5d17c924e4bd81315f5ecc937a2a52c84091c",
+    "/291.js": "4d6e7023beee65047202594c8d77bb8964072dff",
+    "/341.js": "2e7b9d8e506f3c1669178d84ce83dcab11ba06d6",
+    "/818.js": "dde413e5eacbbba2dc287ef0a048cc71c4827f02",
+    "/976.js": "4736e49bc57392021e429c56dd9d807432435925",
+    "/assets/seed-forms.json": "d1be210dd1819130360f7c2eccdf41db1f489fbb",
+    "/index.html": "86469f012c70d555d77b0c08195c60974ead5e87",
+    "/main.js": "9741336dc92817c0577991ee6ee4f1983116fa84",
+    "/manifest.webmanifest": "013f3e9c81e71de9f0e975988049e62eab758003",
+    "/polyfills.js": "6415dc28e8e218bf8bc44cf17c3b206b2386eb95",
+    "/runtime.js": "3782ba6db9d6f0933d96d17efdb2fd2b85a9f61f",
+    "/styles.css": "c6f3b2ade60fb8144d5fcf7f1f79ff81b9c80d51"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}

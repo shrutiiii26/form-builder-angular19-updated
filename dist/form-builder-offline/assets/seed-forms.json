@@ -1,0 +1,177 @@
+[
+  {
+    "id": "form-1",
+    "name": "Employee Onboarding",
+    "version": "1.0.0",
+    "schema": {
+      "title": "Employee Onboarding Form",
+      "pages": [
+        {
+          "id": "page-1",
+          "title": "Personal Information",
+          "elements": [
+            {
+              "id": "f1",
+              "type": "text",
+              "label": "Full Name",
+              "required": true,
+              "placeholder": "Enter your full name",
+              "validators": {
+                "minLength": 3,
+                "maxLength": 100
+              }
+            },
+            {
+              "id": "f2",
+              "type": "date",
+              "label": "Start Date",
+              "required": true
+            },
+            {
+              "id": "f3",
+              "type": "select",
+              "label": "Role",
+              "required": true,
+              "options": ["Engineer", "Manager", "Designer", "Other"]
+            },
+            {
+              "id": "f4",
+              "type": "text",
+              "label": "Specify Other Role",
+              "required": false,
+              "placeholder": "Please specify your role"
+            }
+          ]
+        },
+        {
+          "id": "page-2",
+          "title": "Employment Details",
+          "elements": [
+            {
+              "id": "f5",
+              "type": "select",
+              "label": "Department",
+              "required": true,
+              "options": ["Engineering", "Marketing", "Sales", "HR", "Finance"]
+            },
+            {
+              "id": "f6",
+              "type": "number",
+              "label": "Monthly Salary",
+              "required": true,
+              "validators": {
+                "min": 0,
+                "max": 1000000
+              }
+            },
+            {
+              "id": "f5_total",
+              "type": "number",
+              "label": "Annual Salary (Computed)",
+              "required": false,
+              "disabled": true
+            },
+            {
+              "id": "f7",
+              "type": "checkbox",
+              "label": "I agree to the terms and conditions",
+              "required": true
+            }
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "if": "f3 === 'Other'",
+          "then": [
+            {
+              "action": "show",
+              "target": "f4"
+            }
+          ]
+        },
+        {
+          "if": "f3 !== 'Other'",
+          "then": [
+            {
+              "action": "hide",
+              "target": "f4"
+            }
+          ]
+        }
+      ],
+      "computed": [
+        {
+          "target": "f5_total",
+          "expr": "f6 * 12",
+          "dependencies": ["f6"]
+        }
+      ]
+    },
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "form-2",
+    "name": "Customer Feedback",
+    "version": "1.0.0",
+    "schema": {
+      "title": "Customer Feedback Form",
+      "pages": [
+        {
+          "id": "page-1",
+          "title": "Your Experience",
+          "elements": [
+            {
+              "id": "fb1",
+              "type": "text",
+              "label": "Name",
+              "required": true,
+              "placeholder": "Your name"
+            },
+            {
+              "id": "fb2",
+              "type": "text",
+              "label": "Email",
+              "required": true,
+              "placeholder": "your.email@example.com",
+              "validators": {
+                "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              }
+            },
+            {
+              "id": "fb3",
+              "type": "radio",
+              "label": "Overall Satisfaction",
+              "required": true,
+              "options": [
+                "Very Satisfied",
+                "Satisfied",
+                "Neutral",
+                "Dissatisfied",
+                "Very Dissatisfied"
+              ]
+            },
+            {
+              "id": "fb4",
+              "type": "textarea",
+              "label": "Comments",
+              "required": false,
+              "placeholder": "Please share your feedback..."
+            },
+            {
+              "id": "fb5",
+              "type": "checkbox",
+              "label": "Would you recommend us to others?",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "rules": [],
+      "computed": []
+    },
+    "createdAt": "2025-01-02T00:00:00.000Z",
+    "updatedAt": "2025-01-02T00:00:00.000Z"
+  }
+]
